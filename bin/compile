@@ -1,8 +1,16 @@
 #! /bin/bash
 
-set -eu
+set -e
 
-SPARK_BUILDPACK_VERSION=$(cat ./bin/version)
+if [ $BUILDPACK_DEBUG -eq '1' ]; then
+    set -x
+fi
+
+SPARK_BUILDPACK_VERSION=3.0.1
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
 
 if [ -z $SPARK_VERSION ]; then
     SPARK_VERSION=$SPARK_BUILDPACK_VERSION
@@ -11,11 +19,26 @@ SPARK_DOWNLOAD_URL=https://miroir.univ-lorraine.fr/apache/spark/spark-${SPARK_VE
 SPARK_ARCHIVE=spark-${SPARK_VERSION}.tgz
 SPARK_DIR=spark-${SPARK_VERSION}
 
-echo -n "-----> Downloading Spark... from $SPARK_DOWNLOAD_URL
-curl -s --retry 3 -L $SPARK_DOWNLOAD_URL -o $SPARK_ARCHIVE
+echo -n "-----> Downloading Spark... from $SPARK_DOWNLOAD_URL"
+
+if [ -f $CACHE_DIR/$SPARK_ARCHIVE ]; then
+    echo "-----> Spark archive has been cached. Skip download."
+else
+    curl -s --retry 3 -L $SPARK_DOWNLOAD_URL -o $CACHE_DIR/$SPARK_ARCHIVE
+    echo "-----> Download fininshed"
+fi
 
 echo "-----> Untar the archive"
-tar xvf $SPARK_ARCHIVE
 
-echo "done"
+if [ -d $SPARK_DIR ]; then
+    echo "-----> Spark directory has been cached. Skip untar."
+else
+    tar xvf $CACHE_DIR/$SPARK_ARCHIVE
+    mv $SPARK_DIR-bin-without-hadoop $SPARK_DIR
+    echo "-----> Untar done"
+fi
 
+ls -l
+ls -l $SPARK_DIR
+
+echo "-----> end of buildpack"

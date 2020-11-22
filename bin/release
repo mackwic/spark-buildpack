@@ -4,5 +4,5 @@
 cat << EOF
 addons: []
 default_process_types:
-  web: spark-${SPARK_VERSION}/sbin/start-master.sh
+  web: spark-${SPARK_VERSION:-3.0.1}/sbin/start-master.sh
 EOF
