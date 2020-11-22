@@ -1,4 +1,8 @@
-#! /bin/bash
+#!/bin/sh
 
-echo "Apache Spark"
+if [-z $SPARK_VERSION ]; then
+    SPARK_VERSION=$(cat ./bin/version)
+fi
+
+echo "Apache Spark v${SPARK_VERSION}"
 exit 0
